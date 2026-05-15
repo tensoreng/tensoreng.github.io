@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>规则管理模块</title>
+
+  <link rel="stylesheet"
+        href="https://unpkg.com/element-plus/dist/index.css">
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+
+  <style>
+
+    body {
+      margin: 0;
+      background: #f5f7fa;
+      font-family: Arial;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .field-box {
+      border: 1px solid #dcdfe6;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+
+    .reserve-box {
+      border: 1px dashed #c0c4cc;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      background: #fcfcfc;
+    }
+
+    .json-box {
+      background: #111;
+      color: #00ff90;
+      padding: 15px;
+      border-radius: 8px;
+      overflow: auto;
+      font-size: 13px;
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="app" class="container">
+
+  <div class="card">
+
+    <div class="section-title">
+      基础信息
+    </div>
+
+    <div class="row">
+
+      <el-input
+        v-model="rule.name"
+        placeholder="规则名称">
+      </el-input>
+
+      <el-select
+        v-model="rule.template"
+        style="width:220px">
+
+        <el-option
+          label="单IP模板"
+          value="SINGLE_IP">
+        </el-option>
+
+        <el-option
+          label="互联模板"
+          value="P2P">
+        </el-option>
+
+        <el-option
+          label="子网模板"
+          value="SUBNET">
+        </el-option>
+
+      </el-select>
+
+    </div>
+
+  </div>
+
+
+  <!-- SINGLE_IP -->
+
+  <div class="card"
+       v-if="rule.template === 'SINGLE_IP'">
+
+    <div class="section-title">
+      IP字段配置
+    </div>
+
+    <div
+      class="field-box"
+      v-for="(field,index) in rule.ipFields"
+      :key="index">
+
+      <div class="row">
+
+        <el-select
+          v-model="field.field"
+          style="width:220px">
+
+          <el-option
+            v-for="item in ipFieldOptions"
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
+
+        </el-select>
+
+        <el-checkbox v-model="field.required">
+          必填
+        </el-checkbox>
+
+        <el-button
+          type="danger"
+          @click="removeIpField(index)">
+          删除
+        </el-button>
+
+      </div>
+
+    </div>
+
+    <el-button
+      type="primary"
+      @click="addIpField">
+      新增IP字段
+    </el-button>
+
+  </div>
+
+
+  <!-- P2P -->
+
+  <div class="card"
+       v-if="rule.template === 'P2P'">
+
+    <div class="section-title">
+      互联模板配置
+    </div>
+
+    <div class="row">
+
+      <span>默认掩码</span>
+
+      <el-select
+        v-model="rule.defaultMask"
+        style="width:120px">
+
+        <el-option label="/30" :value="30"></el-option>
+        <el-option label="/31" :value="31"></el-option>
+
+      </el-select>
+
+    </div>
+
+    <el-alert
+      title="固定逻辑：自动生成 deviceA/deviceB IP"
+      type="info"
+      :closable="false">
+    </el-alert>
+
+  </div>
+
+
+  <!-- SUBNET -->
+
+  <div class="card"
+       v-if="rule.template === 'SUBNET'">
+
+    <div class="section-title">
+      子网字段配置
+    </div>
+
+    <div
+      class="field-box"
+      v-for="(field,index) in rule.subnetFields"
+      :key="index">
+
+      <div class="row">
+
+        <el-select
+          v-model="field.field"
+          style="width:220px">
+
+          <el-option
+            v-for="item in subnetFieldOptions"
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
+
+        </el-select>
+
+        <el-checkbox v-model="field.required">
+          必填
+        </el-checkbox>
+
+        <el-button
+          type="danger"
+          @click="removeSubnetField(index)">
+          删除
+        </el-button>
+
+      </div>
+
+    </div>
+
+    <el-button
+      type="primary"
+      @click="addSubnetField">
+      新增子网字段
+    </el-button>
+
+  </div>
+
+
+  <div class="card"
+       v-if="rule.template === 'SUBNET'">
+
+    <div class="section-title">
+      IP字段配置
+    </div>
+
+    <div
+      class="field-box"
+      v-for="(field,index) in rule.ipFields"
+      :key="index">
+
+      <div class="row">
+
+        <el-select
+          v-model="field.field"
+          style="width:220px">
+
+          <el-option
+            v-for="item in ipFieldOptions"
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
+
+        </el-select>
+
+        <el-checkbox v-model="field.required">
+          必填
+        </el-checkbox>
+
+        <el-button
+          type="danger"
+          @click="removeIpField(index)">
+          删除
+        </el-button>
+
+      </div>
+
+    </div>
+
+    <el-button
+      type="primary"
+      @click="addIpField">
+      新增IP字段
+    </el-button>
+
+  </div>
+
+
+  <!-- 分配模式 -->
+
+  <div class="card"
+       v-if="rule.template === 'SUBNET'">
+
+    <div class="section-title">
+      IP分配模式
+    </div>
+
+    <el-select
+      v-model="rule.ipAllocMode"
+      style="width:260px">
+
+      <el-option
+        label="手工逐个申请"
+        value="manual">
+      </el-option>
+
+      <el-option
+        label="自动顺序分配"
+        value="auto_sequential">
+      </el-option>
+
+      <el-option
+        label="整段全占"
+        value="full_reserved">
+      </el-option>
+
+    </el-select>
+
+  </div>
+
+
+  <!-- 预留规则 -->
+
+  <div class="card"
+       v-if="rule.template === 'SUBNET'">
+
+    <div class="section-title">
+      预留规则
+    </div>
+
+    <div
+      class="reserve-box"
+      v-for="(reserve,index) in rule.reservations"
+      :key="index">
+
+      <div class="row">
+
+        <el-select
+          v-model="reserve.position"
+          style="width:120px">
+
+          <el-option label="前置" value="start"></el-option>
+          <el-option label="后置" value="end"></el-option>
+
+        </el-select>
+
+        <el-input-number
+          v-model="reserve.count"
+          :min="1">
+        </el-input-number>
+
+        <el-select
+          v-model="reserve.ipType"
+          style="width:180px">
+
+          <el-option
+            v-for="item in ipTypes"
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
+
+        </el-select>
+
+        <el-button
+          type="danger"
+          @click="removeReservation(index)">
+          删除
+        </el-button>
+
+      </div>
+
+    </div>
+
+    <el-button
+      type="primary"
+      @click="addReservation">
+      新增预留规则
+    </el-button>
+
+  </div>
+
+
+  <!-- JSON -->
+
+  <div class="card">
+
+    <div class="section-title">
+      规则JSON
+    </div>
+
+    <div class="json-box">
+<pre>{{ formatJson(rule) }}</pre>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const { createApp } = Vue
+
+createApp({
+
+  data() {
+
+    return {
+
+      subnetFieldOptions:[
+        'biz_system_id',
+        'vlan_id',
+        'device_group_id',
+        'device_id',
+        'tenant_id',
+        'region_id'
+      ],
+
+      ipFieldOptions:[
+        'hostname',
+        'device_id',
+        'domain',
+        'biz_system_id',
+        'mac_address',
+        'description'
+      ],
+
+      ipTypes:[
+        'host',
+        'gateway',
+        'switch',
+        'dhcp',
+        'vip',
+        'reserved',
+        'network',
+        'broadcast'
+      ],
+
+      rule:{
+
+        name:'',
+
+        template:'SUBNET',
+
+        subnetFields:[
+
+        ],
+
+        ipFields:[
+
+        ],
+
+        reservations:[
+
+        ],
+
+        ipAllocMode:'manual',
+
+        defaultMask:30
+
+      }
+
+    }
+
+  },
+
+  watch:{
+
+    'rule.template'(val){
+
+      // 切换模板时重置结构
+
+      if(val === 'SINGLE_IP'){
+
+        this.rule.subnetFields = []
+        this.rule.reservations = []
+        this.rule.ipAllocMode = 'manual'
+
+      }
+
+      if(val === 'P2P'){
+
+        this.rule.subnetFields = []
+        this.rule.ipFields = []
+        this.rule.reservations = []
+        this.rule.ipAllocMode = 'manual'
+
+      }
+
+      if(val === 'SUBNET'){
+
+        if(!this.rule.subnetFields){
+          this.rule.subnetFields = []
+        }
+
+        if(!this.rule.ipFields){
+          this.rule.ipFields = []
+        }
+
+        if(!this.rule.reservations){
+          this.rule.reservations = []
+        }
+
+      }
+
+    }
+
+  },
+
+  methods:{
+
+    addSubnetField(){
+
+      this.rule.subnetFields.push({
+        field:'',
+        required:true
+      })
+
+    },
+
+    removeSubnetField(index){
+      this.rule.subnetFields.splice(index,1)
+    },
+
+    addIpField(){
+
+      this.rule.ipFields.push({
+        field:'',
+        required:true
+      })
+
+    },
+
+    removeIpField(index){
+      this.rule.ipFields.splice(index,1)
+    },
+
+    addReservation(){
+
+      this.rule.reservations.push({
+        position:'start',
+        count:1,
+        ipType:'reserved'
+      })
+
+    },
+
+    removeReservation(index){
+      this.rule.reservations.splice(index,1)
+    },
+
+    formatJson(data){
+      return JSON.stringify(data,null,2)
+    }
+
+  }
+
+}).use(ElementPlus).mount('#app')
+
+</script>
+
+</body>
+</html>
