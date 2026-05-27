@@ -39,6 +39,7 @@
       gap: 12px;
       margin-bottom: 12px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .field-box {
@@ -66,242 +67,180 @@
     <!-- SINGLE_IP -->
     <div class="card" v-if="rule.template === 'SINGLE_IP'">
 
-      <div class="section-title">
-        基础配置
-      </div>
+      <div class="section-title">基础配置</div>
 
       <div class="row">
-        <el-input v-model="rule.name" placeholder="规则名称" style="width:200px">
+        <el-input v-model="rule.name" placeholder="规则名称" style="width:200px"></el-input>
+
+        <el-input
+          v-model="rule.description"
+          placeholder="规则描述"
+          style="width:320px">
         </el-input>
+
         <el-select v-model="rule.template" style="width:220px">
-          <el-option label="单IP模板" value="SINGLE_IP">
-          </el-option>
-          <el-option label="互联模板" value="P2P">
-          </el-option>
-          <el-option label="子网模板" value="SUBNET">
-          </el-option>
+          <el-option label="单IP模板" value="SINGLE_IP"></el-option>
+          <el-option label="互联模板" value="P2P"></el-option>
+          <el-option label="子网模板" value="SUBNET"></el-option>
         </el-select>
       </div>
 
     </div>
 
+    <!-- SINGLE_IP IP字段 -->
     <div class="card" v-if="rule.template === 'SINGLE_IP'">
 
-      <div class="section-title">
-        IP字段配置
-      </div>
+      <div class="section-title">IP字段配置</div>
 
       <div class="field-box" v-for="(field,index) in rule.ipFields" :key="index">
-
         <div class="row">
 
           <el-select v-model="field.field" style="width:220px">
-
-            <el-option v-for="item in ipFieldOptions" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-
+            <el-option v-for="item in ipFieldOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
 
-          <el-checkbox v-model="field.required">
-            必填
-          </el-checkbox>
+          <el-checkbox v-model="field.required">必填</el-checkbox>
 
-          <el-button type="danger" @click="removeIpField(index)">
-            删除
-          </el-button>
+          <el-button type="danger" @click="removeIpField(index)">删除</el-button>
 
         </div>
-
       </div>
 
-      <el-button type="primary" @click="addIpField">
-        新增IP字段
-      </el-button>
+      <el-button type="primary" @click="addIpField">新增IP字段</el-button>
 
     </div>
 
 
-    <!-- 掩码位数配置 -->
+    <!-- P2P / SUBNET 基础配置 -->
     <div class="card" v-if="rule.template === 'P2P' || rule.template === 'SUBNET'">
 
-      <div class="section-title">
-        基础配置
-      </div>
+      <div class="section-title">基础配置</div>
 
       <div class="row">
-        <el-input v-model="rule.name" placeholder="规则名称" style="width:200px">
+        <el-input v-model="rule.name" placeholder="规则名称" style="width:200px"></el-input>
+
+        <el-input
+          v-model="rule.description"
+          placeholder="规则描述"
+          style="width:320px">
         </el-input>
+
         <el-select v-model="rule.template" style="width:220px">
-          <el-option label="单IP模板" value="SINGLE_IP">
-          </el-option>
-          <el-option label="互联模板" value="P2P">
-          </el-option>
-          <el-option label="子网模板" value="SUBNET">
-          </el-option>
+          <el-option label="单IP模板" value="SINGLE_IP"></el-option>
+          <el-option label="互联模板" value="P2P"></el-option>
+          <el-option label="子网模板" value="SUBNET"></el-option>
         </el-select>
       </div>
 
       <div class="row">
-
         <span style="width:90px">最小掩码</span>
-        <el-input-number v-model="maskConfig.min" :min="1" :max="32" controls-position="right" style="width:90px">
-        </el-input-number>
+        <el-input-number v-model="maskConfig.min" :min="1" :max="32" controls-position="right" style="width:90px" />
 
         <span style="width:90px;margin-left:15px">最大掩码</span>
-        <el-input-number v-model="maskConfig.max" :min="1" :max="32" controls-position="right" style="width:90px">
-        </el-input-number>
+        <el-input-number v-model="maskConfig.max" :min="1" :max="32" controls-position="right" style="width:90px" />
 
         <span style="width:70px;margin-left:15px">默认掩码</span>
         <el-input-number v-model="rule.defaultMask" :min="maskConfig.min" :max="maskConfig.max"
-          controls-position="right" style="width:90px">
-        </el-input-number>
-
+          controls-position="right" style="width:90px" />
       </div>
 
-      <div class="row" v-if="rule.template === 'SUBNET'"
-        style="margin-top:12px;padding-top:12px;border-top:1px dashed #e4e7ed">
+      <div class="row" v-if="rule.template === 'SUBNET'">
         <span style="width:90px">是否分配VLAN</span>
-        <el-switch v-model="rule.assignVlan" active-text="是" inactive-text="否">
-        </el-switch>
-
+        <el-switch v-model="rule.assignVlan" active-text="是" inactive-text="否" />
       </div>
-      <div class="row" v-if="rule.template === 'SUBNET'"
-        style="margin-top:12px;padding-top:12px;border-top:1px dashed #e4e7ed">
+
+      <div class="row" v-if="rule.template === 'SUBNET'">
         <span style="width:90px;">分配地址</span>
         <el-select v-model="rule.addressType" style="width:120px">
-          <el-option v-for="item in ipTypes" :key="item.value" :label="item.label" :value="item.value">
-          </el-option>
+          <el-option v-for="item in ipTypes" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
       </div>
+
     </div>
 
-    <!-- SUBNET -->
 
+    <!-- SUBNET字段 -->
     <div class="card" v-if="rule.template === 'SUBNET'">
 
-      <div class="section-title">
-        子网字段配置
-      </div>
+      <div class="section-title">子网字段配置</div>
 
       <div class="field-box" v-for="(field,index) in rule.subnetFields" :key="index">
-
         <div class="row">
 
           <el-select v-model="field.field" style="width:220px">
-
-            <el-option v-for="item in subnetFieldOptions" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-
+            <el-option v-for="item in subnetFieldOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
 
-          <el-checkbox v-model="field.required">
-            必填
-          </el-checkbox>
+          <el-checkbox v-model="field.required">必填</el-checkbox>
 
-          <el-button type="danger" @click="removeSubnetField(index)">
-            删除
-          </el-button>
+          <el-button type="danger" @click="removeSubnetField(index)">删除</el-button>
 
         </div>
-
       </div>
 
-      <el-button type="primary" @click="addSubnetField">
-        新增子网字段
-      </el-button>
+      <el-button type="primary" @click="addSubnetField">新增子网字段</el-button>
 
     </div>
 
 
+    <!-- SUBNET IP字段 -->
     <div class="card" v-if="rule.template === 'SUBNET'">
 
-      <div class="section-title">
-        IP字段配置
-      </div>
+      <div class="section-title">IP字段配置</div>
 
       <div class="field-box" v-for="(field,index) in rule.ipFields" :key="index">
-
         <div class="row">
 
           <el-select v-model="field.field" style="width:220px">
-
-            <el-option v-for="item in ipFieldOptions" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-
+            <el-option v-for="item in ipFieldOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
 
-          <el-checkbox v-model="field.required">
-            必填
-          </el-checkbox>
+          <el-checkbox v-model="field.required">必填</el-checkbox>
 
-          <el-button type="danger" @click="removeIpField(index)">
-            删除
-          </el-button>
+          <el-button type="danger" @click="removeIpField(index)">删除</el-button>
 
         </div>
-
       </div>
 
-      <el-button type="primary" @click="addIpField">
-        新增IP字段
-      </el-button>
+      <el-button type="primary" @click="addIpField">新增IP字段</el-button>
 
     </div>
 
 
     <!-- 预留规则 -->
-
     <div class="card" v-if="rule.template === 'SUBNET'">
 
-      <div class="section-title">
-        预留规则
-      </div>
+      <div class="section-title">预留规则</div>
 
       <div class="reserve-box" v-for="(reserve,index) in rule.reservations" :key="index">
 
         <div class="row">
 
           <el-select v-model="reserve.position" style="width:120px">
-
-            <el-option label="前置" value="start"></el-option>
-            <el-option label="后置" value="end"></el-option>
-
+            <el-option label="前置" value="start" />
+            <el-option label="后置" value="end" />
           </el-select>
 
-          <el-input-number v-model="reserve.count" :min="1">
-          </el-input-number>
+          <el-input-number v-model="reserve.count" :min="1" />
 
           <el-select v-model="reserve.ipType" style="width:180px">
-
-            <el-option v-for="item in ipTypes" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-
+            <el-option v-for="item in ipTypes" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
 
-          <el-button type="danger" @click="removeReservation(index)">
-            删除
-          </el-button>
+          <el-button type="danger" @click="removeReservation(index)">删除</el-button>
 
         </div>
-
       </div>
 
-      <el-button type="primary" @click="addReservation">
-        新增预留规则
-      </el-button>
+      <el-button type="primary" @click="addReservation">新增预留规则</el-button>
 
     </div>
 
 
-    <!-- 预览申请单 -->
-
+    <!-- 预览 -->
     <div class="card">
+      <div class="section-title">预览申请单</div>
 
-      <div class="section-title">
-        预览申请单
-      </div>
-
-      <!-- SINGLE_IP 申请单 -->
       <div v-if="rule.template === 'SINGLE_IP'">
         <el-table :data="[{}]" border>
           <el-table-column prop="address" label="地址段" width="200">
@@ -309,62 +248,69 @@
               <span style="color:#909399">192.168.1.100/32</span>
             </template>
           </el-table-column>
-          <el-table-column v-for="(f, idx) in rule.ipFields" :key="idx" :label="getFieldLabel(f.field, 'ip')"
-            min-width="120">
-          </el-table-column>
+
+          <el-table-column v-for="(f, idx) in rule.ipFields"
+            :key="idx"
+            :label="getFieldLabel(f.field, 'ip')"
+            min-width="120" />
         </el-table>
       </div>
 
-      <!-- P2P 申请单 -->
       <div v-if="rule.template === 'P2P'">
         <el-table :data="[{}]" border>
-          <el-table-column prop="address" label="地址段" width="200">
+          <el-table-column label="地址段" width="200">
             <template #default>
               <span style="color:#909399">192.168.1.0/30</span>
             </template>
           </el-table-column>
-          <el-table-column prop="mask" label="掩码位数" width="100">
+
+          <el-table-column label="掩码位数" width="100">
             <template #default>
               <span style="color:#909399">{{ rule.defaultMask }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="deviceA" label="互联设备A" width="150">
-            <template #default>
-              <span style="color:#909399">LF-Device1</span>
-            </template>
+
+          <el-table-column label="互联设备A" width="150">
+            <template #default><span style="color:#909399">LF-Device1</span></template>
           </el-table-column>
-          <el-table-column prop="deviceB" label="互联设备B" width="150">
-            <template #default>
-              <span style="color:#909399">LF-Device2</span>
-            </template>
+
+          <el-table-column label="互联设备B" width="150">
+            <template #default><span style="color:#909399">LF-Device2</span></template>
           </el-table-column>
         </el-table>
       </div>
 
-      <!-- SUBNET 申请单 -->
       <div v-if="rule.template === 'SUBNET'">
         <el-table :data="[{}]" border>
-          <el-table-column prop="address" label="地址段" width="200">
+
+          <el-table-column label="地址段" width="200">
             <template #default>
               <span style="color:#909399">192.168.0.0/24</span>
             </template>
           </el-table-column>
-          <el-table-column prop="count" label="地址数量" width="100">
+
+          <el-table-column label="地址数量" width="100">
             <template #default>
               <span style="color:#909399">256</span>
             </template>
           </el-table-column>
-          <el-table-column prop="mask" label="掩码位数" width="100">
+
+          <el-table-column label="掩码位数" width="100">
             <template #default>
               <span style="color:#909399">{{ rule.defaultMask }}</span>
             </template>
           </el-table-column>
-          <el-table-column v-for="(f, idx) in rule.subnetFields" :key="'subnet-' + idx"
-            :label="getFieldLabel(f.field, 'subnet')" min-width="120">
-          </el-table-column>
-          <el-table-column v-for="(f, idx) in rule.ipFields" :key="'ip-' + idx" :label="getFieldLabel(f.field, 'ip')"
-            min-width="120">
-          </el-table-column>
+
+          <el-table-column v-for="(f, idx) in rule.subnetFields"
+            :key="'subnet-' + idx"
+            :label="getFieldLabel(f.field, 'subnet')"
+            min-width="120" />
+
+          <el-table-column v-for="(f, idx) in rule.ipFields"
+            :key="'ip-' + idx"
+            :label="getFieldLabel(f.field, 'ip')"
+            min-width="120" />
+
         </el-table>
       </div>
 
@@ -373,15 +319,11 @@
   </div>
 
   <script>
-
     const { createApp } = Vue
 
     createApp({
-
       data() {
-
         return {
-
           subnetFieldOptions: [
             { label: '关联设备', value: 'device' },
             { label: '业务系统', value: 'biz_system' },
@@ -415,99 +357,43 @@
           },
 
           rule: {
-
             name: '',
-
+            description: '',
             template: 'SUBNET',
-
-            subnetFields: [
-
-            ],
-
-            ipFields: [
-
-            ],
-
-            reservations: [
-
-            ],
-
+            subnetFields: [],
+            ipFields: [],
+            reservations: [],
             assignVlan: false,
-
             addressType: 'host',
-
             defaultMask: 30
-
           }
-
         }
-
       },
 
       watch: {
-
         'rule.template'(val) {
-
-          // 切换模板时重置结构
-
           if (val === 'SINGLE_IP') {
-
             this.rule.subnetFields = []
             this.rule.reservations = []
-
           }
 
           if (val === 'P2P') {
-
             this.rule.subnetFields = []
             this.rule.ipFields = []
             this.rule.reservations = []
-
           }
 
           if (val === 'SUBNET') {
-
-            if (!this.rule.subnetFields) {
-              this.rule.subnetFields = []
-            }
-
-            if (!this.rule.ipFields) {
-              this.rule.ipFields = []
-            }
-
-            if (!this.rule.reservations) {
-              this.rule.reservations = []
-            }
-
+            this.rule.subnetFields ||= []
+            this.rule.ipFields ||= []
+            this.rule.reservations ||= []
           }
-
         }
-
-      },
-
-      computed: {
-
-        availableMaskBits() {
-          const bits = []
-          const min = Math.min(this.maskConfig.min, this.maskConfig.max)
-          const max = Math.max(this.maskConfig.min, this.maskConfig.max)
-          for (let i = min; i <= max; i++) {
-            bits.push(i)
-          }
-          return bits
-        }
-
       },
 
       methods: {
-
         addSubnetField() {
-
-          this.rule.subnetFields.push({
-            field: '',
-            required: true
-          })
-
+          this.rule.subnetFields.push({ field: '', required: true })
         },
 
         removeSubnetField(index) {
@@ -515,12 +401,7 @@
         },
 
         addIpField() {
-
-          this.rule.ipFields.push({
-            field: '',
-            required: true
-          })
-
+          this.rule.ipFields.push({ field: '', required: true })
         },
 
         removeIpField(index) {
@@ -528,35 +409,25 @@
         },
 
         addReservation() {
-
           this.rule.reservations.push({
             position: 'start',
             count: 1,
             ipType: 'reserved'
           })
-
         },
 
         removeReservation(index) {
           this.rule.reservations.splice(index, 1)
         },
 
-        formatJson(data) {
-          return JSON.stringify(data, null, 2)
-        },
-
         getFieldLabel(fieldValue, type) {
           const options = type === 'ip' ? this.ipFieldOptions : this.subnetFieldOptions
-          const found = options.find(item => item.value === fieldValue)
+          const found = options.find(i => i.value === fieldValue)
           return found ? found.label : fieldValue
         }
-
       }
-
     }).use(ElementPlus).mount('#app')
-
   </script>
 
 </body>
-
 </html>
